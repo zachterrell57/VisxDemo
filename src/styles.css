@@ -1,0 +1,45 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+a,
+a:visited {
+  color: white;
+  font-weight: 100;
+}
+
+.App {
+  font-family: sans-serif;
+  text-align: center;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to right, #a479ff, #2167f9);
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Chart {
+  border-radius: 22px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.Credit {
+  margin-top: 2rem;
+}
+
+.Docs {
+  position: absolute;
+  bottom: 2rem;
+}
+
+.Docs a {
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
