@@ -1,11 +1,11 @@
 import React from "react";
-import { scaleLinear, scaleOrdinal, scaleTime } from "@visx/scale";
-import { Area } from "@visx/shape";
-import { AreaStack } from "@visx/shape";
+import { scaleLinear, scaleOrdinal } from "@visx/scale";
+import { Area, AreaStack } from "@visx/shape";
 import { curveBasis } from "@visx/curve";
 import { Text } from "@visx/text";
 import "./styles.css";
 import { Group } from "@visx/group";
+import { AxisLeft } from "@visx/axis";
 
 const x = (d) => d.index;
 
@@ -45,68 +45,46 @@ function interpolateData(segments) {
   return segments.map((d, i) => interpolatePoints(d, segments[i + 1])).flat();
 }
 
-// const segments = [
-//   { index: 0, value: 3287 },
-//   { index: 1, value: 1237 },
-//   { index: 2, value: 1000 },
-//   { index: 3, value: 700 },
-//   { index: 4, value: 400 },
-//   { index: 5, value: 400 }, // hacky way to add a final segment that doesn't show
-// ];
-
 const segments = [
   {
     index: 0,
-    Twitter: 3287,
-    Facebook: 2000,
-    Instagram: 1000,
-    LinkedIn: 700,
-    Google: 400,
+    google: 3287,
+    instagram: 1437,
+    linkedin: 2045,
+    twitter: 2645,
   },
   {
     index: 1,
-    Twitter: 1237,
-    Facebook: 1700,
-    Instagram: 1000,
-    LinkedIn: 700,
-    Google: 400,
+    google: 2787,
+    instagram: 1937,
+    linkedin: 2545,
+    twitter: 2145,
   },
   {
     index: 2,
-    Twitter: 1000,
-    Facebook: 1500,
-    Instagram: 1000,
-    LinkedIn: 700,
-    Google: 400,
+    google: 1924,
+    instagram: 1237,
+    linkedin: 1845,
+    twitter: 1145,
   },
   {
     index: 3,
-    Twitter: 700,
-    Facebook: 1200,
-    Instagram: 1000,
-    LinkedIn: 700,
-    Google: 400,
+    google: 1124,
+    instagram: 1137,
+    linkedin: 1045,
+    twitter: 1045,
   },
   {
     index: 4,
-    Twitter: 400,
-    Facebook: 1000,
-    Instagram: 1000,
-    LinkedIn: 700,
-    Google: 400,
+    google: 900,
+    instagram: 800,
+    linkedin: 900,
+    twitter: 700,
   },
-  {
-    index: 4,
-    Twitter: 400,
-    Facebook: 1000,
-    Instagram: 1000,
-    LinkedIn: 700,
-    Google: 400,
-  }, // hacky way to add a final segment that doesn't show
 ];
 
-const keys = ["Twitter", "Facebook", "Instagram", "LinkedIn", "Google"];
-// const keys = ["Twitter", "Facebook"];
+// const keys = ["Twitter", "Facebook", "Instagram", "LinkedIn", "Google"];
+const keys = ["google", "instagram", "linkedin", "twitter"];
 
 const steps = {
   0: "Click",
@@ -116,10 +94,26 @@ const steps = {
   4: "Unique Mints",
 };
 
-// const keys = ["Group1", "Group2", "Group3"];
-
 // const data = interpolateData(segments);
 const data = segments;
+
+// function calculateStackData(data, keys) {
+//   const stackedData = data.map((d, i) => {
+//     const index = d.index;
+//     let total = 0;
+//     return keys.reduce(
+//       (acc, key) => {
+//         total += d[key];
+//         acc[key] = total;
+//         return acc;
+//       },
+//       { index }
+//     );
+//   });
+//   return stackedData;
+// }
+
+// const data = calculateStackData(segments, keys);
 
 function FunnelChart({ width, height }) {
   const numSegments = Math.max(...segments.map(x));
@@ -132,10 +126,35 @@ function FunnelChart({ width, height }) {
     range: [0, width],
     domain: [x(data[0]), x(data[data.length - 1])],
   });
+  // const yScale = scaleLinear({
+  //   range: [height, 0],
+  //   domain: [0, maxValue],
+  // });
+  // const yScale = scaleLinear({
+  //   range: [0, height],
+  //   domain: [0, maxValue],
+  // });
+
+  // set max equal to the max value of all the data added together
+  const max = data.reduce((acc, d) => {
+    let total = 0;
+    for (let key in d) {
+      if (key !== "index") {
+        total += d[key];
+      }
+    }
+    if (total > acc) {
+      acc = total;
+    }
+    return acc;
+  }, 0);
+
+  // set y scale domain
   const yScale = scaleLinear({
     range: [height, 0],
-    domain: [0, maxValue],
+    domain: [0, max + 10000],
   });
+
   const zScale = scaleOrdinal({
     range: ["green", "yellow", "red", "blue", "purple"],
     domain: keys,
@@ -172,17 +191,6 @@ function FunnelChart({ width, height }) {
         const r = range(numSegments);
         return (
           <React.Fragment key={`label-${i}`}>
-            {r.includes(x(d)) && (
-              <Text
-                textAnchor="middle"
-                fill="black"
-                fontFamily="Inter"
-                dy={".33em"}
-                x={xScale(x(d)) + xPadding}
-                y={yScale(y(d) / 2)}>
-                {`${y(d)}`}
-              </Text>
-            )}
             {r.includes(x(d)) && (
               <line
                 x1={xScale(x(d) + 1)}
