@@ -81,9 +81,16 @@ const segments = [
     linkedin: 900,
     twitter: 700,
   },
+  {
+    //hack to make the last segment show up
+    index: 5,
+    google: 900,
+    instagram: 800,
+    linkedin: 900,
+    twitter: 700,
+  },
 ];
 
-// const keys = ["Twitter", "Facebook", "Instagram", "LinkedIn", "Google"];
 const keys = ["google", "instagram", "linkedin", "twitter"];
 
 const steps = {
@@ -97,27 +104,8 @@ const steps = {
 // const data = interpolateData(segments);
 const data = segments;
 
-// function calculateStackData(data, keys) {
-//   const stackedData = data.map((d, i) => {
-//     const index = d.index;
-//     let total = 0;
-//     return keys.reduce(
-//       (acc, key) => {
-//         total += d[key];
-//         acc[key] = total;
-//         return acc;
-//       },
-//       { index }
-//     );
-//   });
-//   return stackedData;
-// }
-
-// const data = calculateStackData(segments, keys);
-
 function FunnelChart({ width, height }) {
   const numSegments = Math.max(...segments.map(x));
-  const maxValue = Math.max(...data.map(y));
 
   const xPadding = width / numSegments / 2;
   const yPadding = height / 10;
@@ -126,14 +114,6 @@ function FunnelChart({ width, height }) {
     range: [0, width],
     domain: [x(data[0]), x(data[data.length - 1])],
   });
-  // const yScale = scaleLinear({
-  //   range: [height, 0],
-  //   domain: [0, maxValue],
-  // });
-  // const yScale = scaleLinear({
-  //   range: [0, height],
-  //   domain: [0, maxValue],
-  // });
 
   // set max equal to the max value of all the data added together
   const max = data.reduce((acc, d) => {
@@ -149,12 +129,12 @@ function FunnelChart({ width, height }) {
     return acc;
   }, 0);
 
-  // set y scale domain
   const yScale = scaleLinear({
     range: [height, 0],
-    domain: [0, max + 10000],
+    domain: [0, max * 1.3], // add 30% to the max value to give some space at the top
   });
 
+  // I have no idea why this is 'z' axis, but it's the color of the funnel
   const zScale = scaleOrdinal({
     range: ["green", "yellow", "red", "blue", "purple"],
     domain: keys,
@@ -162,7 +142,7 @@ function FunnelChart({ width, height }) {
 
   return (
     <svg width={width} height={height}>
-      {/* This is the funnel */}
+      {/* This is the stacked funnel */}
       <AreaStack
         keys={keys}
         data={data}
@@ -172,7 +152,7 @@ function FunnelChart({ width, height }) {
         fillOpacity={1}
         x={(d) => xScale(x(d.data))}
         y0={(d) => yScale(d[0])}
-        y1={(d) => yScale(d[0] + d[1])}>
+        y1={(d) => yScale(d[1])}>
         {({ stacks, path }) =>
           stacks.map((stack, i) => (
             <path
@@ -190,7 +170,7 @@ function FunnelChart({ width, height }) {
         if (!data[i + 1] || i === data.length - 1) return null;
         const r = range(numSegments);
         return (
-          <React.Fragment key={`label-${i}`}>
+          <React.Fragment key={`bin-${i}`}>
             {r.includes(x(d)) && (
               <line
                 x1={xScale(x(d) + 1)}
@@ -205,10 +185,34 @@ function FunnelChart({ width, height }) {
         );
       })}
 
+      {/* these are the values in each funnel */}
+      {data.map((d, i) => {
+        if (!data[i + 1] || i === data.length - 1) return null;
+        const r = range(numSegments);
+        if (!r.includes(x(d))) return null;
+        return Object.keys(d).map((key) => {
+          if (key === "index") return;
+          return (
+            <React.Fragment key={`value-${i}-${key}`}>
+              <Text
+                textAnchor="middle"
+                fill="black"
+                fontSize={24}
+                fontFamily="Inter"
+                dy={".33em"}
+                x={xScale(x(d)) + xPadding}
+                y={yScale(d[key])}>
+                {`${d[key]}`}
+              </Text>
+            </React.Fragment>
+          );
+        });
+      })}
+
       {/* These are the steps at the top */}
       {segments.map((d, i) => {
         return (
-          <React.Fragment key={`label-${i}`}>
+          <React.Fragment key={`step-${i}`}>
             <Text
               textAnchor="middle"
               fill="black"
