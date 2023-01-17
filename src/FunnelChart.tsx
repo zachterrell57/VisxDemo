@@ -1,13 +1,10 @@
 import React from "react";
 import { scaleLinear, scaleOrdinal } from "@visx/scale";
-import { Area, AreaClosed, AreaStack } from "@visx/shape";
+import { AreaStack } from "@visx/shape";
 import { curveBasis } from "@visx/curve";
 import { Text } from "@visx/text";
 import "./styles.css";
-import { Group } from "@visx/group";
-import { AxisLeft } from "@visx/axis";
-import { AnnotationLabel } from "@visx/xychart";
-import { Annotation, Label } from "@visx/annotation";
+import { Label } from "@visx/annotation";
 
 const x = (d) => d.index;
 
@@ -201,20 +198,21 @@ function FunnelChart({ width, height }) {
               title={`${key}`}
               fontColor="white"
               horizontalAnchor="start"
+              verticalAnchor="middle"
+              showAnchorLine={false}
               backgroundFill="rgba(0,0,0,0.25)"
-              backgroundPadding={{ top: 4, bottom: 4, left: 16, right: 6 }}
+              backgroundPadding={{ top: 4, bottom: 4, left: 20, right: 16 }}
               backgroundProps={{
                 rx: 4,
               }}
               titleProps={{
                 fontFamily: "Inter",
+                textAnchor: "middle",
                 fontWeight: 400,
                 style: {
                   textTransform: "capitalize",
                 },
               }}
-              showAnchorLine={false}
-              verticalAnchor="middle"
               x={xScale(x(d)) - 4} // -4 to cut off the border radius
               y={yScale(
                 // this code is calculating the sum of values of d object with given key up to index j
