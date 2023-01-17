@@ -1,11 +1,13 @@
 import React from "react";
 import { scaleLinear, scaleOrdinal } from "@visx/scale";
-import { Area, AreaStack } from "@visx/shape";
+import { Area, AreaClosed, AreaStack } from "@visx/shape";
 import { curveBasis } from "@visx/curve";
 import { Text } from "@visx/text";
 import "./styles.css";
 import { Group } from "@visx/group";
 import { AxisLeft } from "@visx/axis";
+import { AnnotationLabel } from "@visx/xychart";
+import { Annotation, Label } from "@visx/annotation";
 
 const x = (d) => d.index;
 
@@ -137,7 +139,7 @@ function FunnelChart({ width, height }) {
 
   // I have no idea why this is 'z' axis, but it's the color of the funnel
   const zScale = scaleOrdinal({
-    range: ["green", "yellow", "red", "blue", "purple"],
+    range: ["#FF59AE", "#FF7E65", "#FFCE7E", "#AFFAAC"],
     domain: keys,
   });
 
@@ -149,7 +151,7 @@ function FunnelChart({ width, height }) {
         data={data}
         strokeWidth={2}
         stroke="transparent"
-        // curve={curveBasis}
+        curve={curveBasis}
         fillOpacity={1}
         x={(d) => xScale(x(d.data))}
         y0={(d) => yScale(d[0])}
@@ -187,6 +189,52 @@ function FunnelChart({ width, height }) {
         );
       })}
 
+      {/* These are the funnel labels */}
+      {data.slice(0, 1).map((d, i) => {
+        if (!data[i + 1] || i === data.length - 1) return null;
+        const r = range(numSegments);
+        if (!r.includes(x(d))) return null;
+        return keys.map((key, j) => {
+          if (key === "index") return;
+          return (
+            <Label
+              title={`${key}`}
+              fontColor="white"
+              horizontalAnchor="start"
+              backgroundFill="rgba(0,0,0,0.25)"
+              backgroundPadding={{ top: 4, bottom: 4, left: 16, right: 6 }}
+              backgroundProps={{
+                rx: 4,
+              }}
+              titleProps={{
+                fontFamily: "Inter",
+                fontWeight: 400,
+                style: {
+                  textTransform: "capitalize",
+                },
+              }}
+              showAnchorLine={false}
+              verticalAnchor="middle"
+              x={xScale(x(d)) - 4} // -4 to cut off the border radius
+              y={yScale(
+                // this code is calculating the sum of values of d object with given key up to index j
+                j > 0
+                  ? keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+                      d[key] -
+                      (keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+                        d[key] -
+                        //get the value of the sum of values of the next segment with given key up to index j - 1
+                        keys
+                          .slice(0, j)
+                          .reduce((acc, k) => acc + data[i + 1][k], 0)) /
+                        2
+                  : d[key] / 2
+              )}
+            />
+          );
+        });
+      })}
+
       {/* these are the values in each funnel */}
       {data.map((d, i) => {
         if (!data[i + 1] || i === data.length - 1) return null;
@@ -200,7 +248,7 @@ function FunnelChart({ width, height }) {
               <Text
                 textAnchor="middle"
                 fill="black"
-                fontSize={24}
+                fontSize={18}
                 fontFamily="Inter"
                 dy={".33em"}
                 x={xScale(x(d)) + xPadding}
