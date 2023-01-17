@@ -91,6 +91,7 @@ const segments = [
   },
 ];
 
+// const keys = ["google", "instagram", "linkedin", "twitter"];
 const keys = ["google", "instagram", "linkedin", "twitter"];
 
 const steps = {
@@ -194,23 +195,6 @@ function FunnelChart({ width, height }) {
         return keys.map((key, j) => {
           if (key === "index") return;
 
-          // console.log(
-          //   "this value",
-          //   yScale(keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) + d[key])
-          // );
-          // console.log(
-          //   "half value",
-          //   yScale(
-          //     keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
-          //       d[key] -
-          //       (d[key] - data[i + 1][key] || 0)
-          //   )
-          // );
-          if (key === "twitter") {
-            console.log(d[key] - data[i + 1][key]);
-            console.log("____________");
-          }
-
           return (
             <React.Fragment key={`value-${i}-${key}`}>
               <Text
@@ -220,12 +204,19 @@ function FunnelChart({ width, height }) {
                 fontFamily="Inter"
                 dy={".33em"}
                 x={xScale(x(d)) + xPadding}
-                x={xScale(x(d))}
                 y={yScale(
                   // this code is calculating the sum of values of d object with given key up to index j
-                  keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
-                    d[key] -
-                    (d[key] - (data[i + 1][key] - d[key])) / 2
+                  j > 0
+                    ? keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+                        d[key] -
+                        (keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+                          d[key] -
+                          //get the value of the sum of values of the next segment with given key up to index j - 1
+                          keys
+                            .slice(0, j)
+                            .reduce((acc, k) => acc + data[i + 1][k], 0)) /
+                          2
+                    : d[key] / 2
                 )}>
                 {`${d[key]}`}
               </Text>
