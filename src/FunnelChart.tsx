@@ -56,8 +56,8 @@ const segments = [
   {
     index: 1,
     google: 2787,
-    instagram: 1937,
-    linkedin: 2545,
+    instagram: 1337,
+    linkedin: 1945,
     twitter: 2145,
   },
   {
@@ -148,11 +148,12 @@ function FunnelChart({ width, height }) {
         data={data}
         strokeWidth={2}
         stroke="transparent"
-        curve={curveBasis}
+        // curve={curveBasis}
         fillOpacity={1}
         x={(d) => xScale(x(d.data))}
         y0={(d) => yScale(d[0])}
         y1={(d) => yScale(d[1])}>
+        {/* This fills in each area with the corresponding color */}
         {({ stacks, path }) =>
           stacks.map((stack, i) => (
             <path
@@ -190,8 +191,26 @@ function FunnelChart({ width, height }) {
         if (!data[i + 1] || i === data.length - 1) return null;
         const r = range(numSegments);
         if (!r.includes(x(d))) return null;
-        return Object.keys(d).map((key) => {
+        return keys.map((key, j) => {
           if (key === "index") return;
+
+          // console.log(
+          //   "this value",
+          //   yScale(keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) + d[key])
+          // );
+          // console.log(
+          //   "half value",
+          //   yScale(
+          //     keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+          //       d[key] -
+          //       (d[key] - data[i + 1][key] || 0)
+          //   )
+          // );
+          if (key === "twitter") {
+            console.log(d[key] - data[i + 1][key]);
+            console.log("____________");
+          }
+
           return (
             <React.Fragment key={`value-${i}-${key}`}>
               <Text
@@ -201,7 +220,13 @@ function FunnelChart({ width, height }) {
                 fontFamily="Inter"
                 dy={".33em"}
                 x={xScale(x(d)) + xPadding}
-                y={yScale(d[key])}>
+                x={xScale(x(d))}
+                y={yScale(
+                  // this code is calculating the sum of values of d object with given key up to index j
+                  keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+                    d[key] -
+                    (d[key] - (data[i + 1][key] - d[key])) / 2
+                )}>
                 {`${d[key]}`}
               </Text>
             </React.Fragment>
