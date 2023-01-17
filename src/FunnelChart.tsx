@@ -203,7 +203,7 @@ function FunnelChart({ width, height }) {
               backgroundFill="rgba(0,0,0,0.25)"
               backgroundPadding={{ top: 4, bottom: 4, left: 20, right: 16 }}
               backgroundProps={{
-                rx: 4,
+                rx: 10,
               }}
               titleProps={{
                 fontFamily: "Inter",
@@ -213,7 +213,7 @@ function FunnelChart({ width, height }) {
                   textTransform: "capitalize",
                 },
               }}
-              x={xScale(x(d)) - 4} // -4 to cut off the border radius
+              x={xScale(x(d)) - 8} // -4 to cut off the border radius
               y={yScale(
                 // this code is calculating the sum of values of d object with given key up to index j
                 j > 0
@@ -233,40 +233,48 @@ function FunnelChart({ width, height }) {
         });
       })}
 
-      {/* these are the values in each funnel */}
       {data.map((d, i) => {
         if (!data[i + 1] || i === data.length - 1) return null;
         const r = range(numSegments);
         if (!r.includes(x(d))) return null;
         return keys.map((key, j) => {
           if (key === "index") return;
-
           return (
-            <React.Fragment key={`value-${i}-${key}`}>
-              <Text
-                textAnchor="middle"
-                fill="black"
-                fontSize={18}
-                fontFamily="Inter"
-                dy={".33em"}
-                x={xScale(x(d)) + xPadding}
-                y={yScale(
-                  // this code is calculating the sum of values of d object with given key up to index j
-                  j > 0
-                    ? keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+            <Label
+              title={`${d[key]}`}
+              fontColor="white"
+              horizontalAnchor="start"
+              verticalAnchor="middle"
+              showAnchorLine={false}
+              backgroundFill="rgba(0,0,0,0.25)"
+              backgroundPadding={{ top: 4, bottom: 4, left: 20, right: 20 }}
+              backgroundProps={{
+                rx: 10,
+              }}
+              titleProps={{
+                fontFamily: "Inter",
+                textAnchor: "middle",
+                fontWeight: 400,
+                style: {
+                  textTransform: "capitalize",
+                },
+              }}
+              x={xScale(x(d)) + xPadding}
+              y={yScale(
+                // this code is calculating the sum of values of d object with given key up to index j
+                j > 0
+                  ? keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
+                      d[key] -
+                      (keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
                         d[key] -
-                        (keys.slice(0, j).reduce((acc, k) => acc + d[k], 0) +
-                          d[key] -
-                          //get the value of the sum of values of the next segment with given key up to index j - 1
-                          keys
-                            .slice(0, j)
-                            .reduce((acc, k) => acc + data[i + 1][k], 0)) /
-                          2
-                    : d[key] / 2
-                )}>
-                {`${d[key]}`}
-              </Text>
-            </React.Fragment>
+                        //get the value of the sum of values of the next segment with given key up to index j - 1
+                        keys
+                          .slice(0, j)
+                          .reduce((acc, k) => acc + data[i + 1][k], 0)) /
+                        2
+                  : d[key] / 2
+              )}
+            />
           );
         });
       })}
@@ -279,6 +287,7 @@ function FunnelChart({ width, height }) {
               textAnchor="middle"
               fill="black"
               fontSize={24}
+              fontWeight={500}
               fontFamily="Inter"
               dy={".33em"}
               x={xScale(x(d)) + xPadding}
